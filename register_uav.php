@@ -2,13 +2,13 @@
   // Check for POST request
   if($_SERVER['REQUEST_METHOD'] == 'POST'){
     // Check if everything has been POSTed
-    if (!empty($_POST['uav_name'])
+    if ( !empty($_POST['uav_name'])
         && !empty($_POST['operator_name'])
         && !empty($_POST['operator_phone'])
         && !empty($_POST['operator_drone_cert'])
         && !empty($_POST['uav_weight_kg'])
         && !empty($_POST['uav_max_vel_mps'])
-        && !empty($_POST['uav_max_endurance_s'])) { //check if post using isset
+        && !empty($_POST['uav_max_endurance_s']) ) { //check if post using isset
       //  PASSED CHECKS
       // Require DB config
       require_once('config.php');
@@ -50,22 +50,27 @@
 
       // Check result
       if($result !== false){
+        // Set 'Created' response code
+        http_response_code(201);
         // Send generated data to user
         $array_out = array(
           "uav_id" => $uav_id,
           "uav_auth_key" => $hash_string,
         );
         echo json_encode($array_out);
-      } else {
-        // Something went wrong
-        echo 0;
+        die();
       }
-    } else {
-      // DID NOT PASS CHECKS
+      // Close DB connection
+      mysqli_close($connection);
+      // Set 'Internal Server Error' response code and output 0
+      http_response_code(500);
       echo 0;
+      die(); // DIE - Authentication failed - not correct format
     }
-  } else {
-    // DID NOT PASS CHECKS
-    echo 0;
   }
+  // DID NOT PASS CHECKS
+  // Set 'Bad Request' response code and output 0
+  http_response_code(400);
+  echo 0;
+  die();
 ?>
