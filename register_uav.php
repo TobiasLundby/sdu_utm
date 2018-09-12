@@ -41,7 +41,7 @@
       // DB code here
       $uav_id = get_next_uav_id_and_incr($con);
 
-      $sql = "INSERT INTO `overview` (`int_id`, `uav_id`, `uav_name`, `operator_name`, `operator_phone`, `operator_drone_cert`, `uav_weight_kg`, `uav_max_vel_mps`, `uav_max_endurance_s`, `uav_auth_key`, `reg_time`, `reg_ip`, `req_user_agent`) VALUES (NULL, '$uav_id', '$uav_name', '$operator_name', '$operator_phone', '$operator_drone_cert', '$uav_weight_kg', '$uav_max_vel_mps', '$uav_max_endurance_s', '$hash_string', '$time_epoch', '$ip_addr', '$user_agent');";
+      $sql = "INSERT INTO `$uav_data_db` (`int_id`, `uav_id`, `uav_name`, `operator_name`, `operator_phone`, `operator_drone_cert`, `uav_weight_kg`, `uav_max_vel_mps`, `uav_max_endurance_s`, `uav_auth_key`, `reg_time`, `reg_ip`, `req_user_agent`) VALUES (NULL, '$uav_id', '$uav_name', '$operator_name', '$operator_phone', '$operator_drone_cert', '$uav_weight_kg', '$uav_max_vel_mps', '$uav_max_endurance_s', '$hash_string', '$time_epoch', '$ip_addr', '$user_agent');";
 
       $result = mysqli_query($con, $sql);          //query
 

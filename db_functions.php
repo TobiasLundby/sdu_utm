@@ -1,9 +1,11 @@
 <?php
+
   function get_data_from_db_single($var_name, $connection){
     // Description: returns a single data entry from the DB for the variable name provided
     // Input: varible name, a mysqli connection
     // Output: data from DB (0 if no data)
-    $sql = "SELECT `data` FROM `data` WHERE `var` = '$var_name' LIMIT 1";
+    global $var_data_db;
+    $sql = "SELECT `data` FROM `$var_data_db` WHERE `var` = '$var_name' LIMIT 1";
     $result = mysqli_query($connection, $sql);          //query
     if ($result !== false && mysqli_num_rows($result) > 0) {
       $row = mysqli_fetch_assoc($result);
@@ -16,7 +18,8 @@
     // Description: returns data entries from the DB for the variable name provided
     // Input: varible name, a mysqli connection
     // Output: data from DB (0 if no data)
-    $sql = "SELECT * FROM `data` WHERE `var` = '$var_name'";
+    global $var_data_db;
+    $sql = "SELECT * FROM `$var_data_db` WHERE `var` = '$var_name'";
     $result = mysqli_query($connection, $sql);          //query
     if ($result !== false && mysqli_num_rows($result) > 0) {
       $combined_data = array();
@@ -32,10 +35,11 @@
     // Description: gets the next UAV ID / DroneID and increment the DB variable
     // Input: mysqli connection
     // Output: next UAV ID or -1 if did not work
+    global $var_data_db;
     $var_name = 'drone_id_next';
     $uav_id_next = get_data_from_db_single($var_name, $connection);
     $uav_id_2next = $uav_id_next + 1;
-    $sql = "UPDATE `data` SET `data` = '$uav_id_2next' WHERE  `var` = '$var_name'";
+    $sql = "UPDATE `data` SET `$var_data_db` = '$uav_id_2next' WHERE  `var` = '$var_name'";
     $result = mysqli_query($connection, $sql);          //query
     if ($result !== false) {
       return intval($uav_id_next);
@@ -52,8 +56,9 @@
     // Description: compares the stored authentication key with the provided authentication key and UAV ID
     // Input: UAV ID, UAV authentication key, and a mysqli connection
     // Output: 1 = True and it terminates the script if the info does not match
+    global $uav_data_db;
     if(strlen($uav_auth_key) === 128){
-      $sql = "SELECT `uav_auth_key` FROM `overview` WHERE `uav_id` = '$uav_id' LIMIT 1";
+      $sql = "SELECT `uav_auth_key` FROM `$uav_data_db` WHERE `uav_id` = '$uav_id' LIMIT 1";
       $result = mysqli_query($connection, $sql);          //query
       if ($result !== false && mysqli_num_rows($result) > 0) {
         $row = mysqli_fetch_assoc($result);
