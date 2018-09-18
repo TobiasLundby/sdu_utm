@@ -10,7 +10,7 @@
           && isset($_POST['pos_cur_alt_m'])
           && isset($_POST['pos_cur_hdg_deg'])
           && isset($_POST['pos_cur_vel_mps'])
-          && !empty($_POST['pos_cur_gps_epoch'])
+          && !empty($_POST['pos_cur_gps_timestamp'])
           && isset($_POST['wp_next_lat_dd'])
           && isset($_POST['wp_next_lng_dd'])
           && isset($_POST['wp_next_alt_m'])
@@ -50,7 +50,7 @@
         $pos_cur_alt_m = floatval( mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['pos_cur_alt_m']) ) ) ) );
         $pos_cur_hdg_deg = floatval( mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['pos_cur_hdg_deg']) ) ) ) );
         $pos_cur_vel_mps = floatval( mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['pos_cur_vel_mps']) ) ) ) );
-        $pos_cur_gps_epoch = intval( mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['pos_cur_gps_epoch']) ) ) ) );
+        $pos_cur_gps_timestamp = intval( mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['pos_cur_gps_timestamp']) ) ) ) );
 
         $wp_next_lat_dd = floatval( mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['wp_next_lat_dd']) ) ) ) );
         $wp_next_lng_dd = floatval( mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['wp_next_lng_dd']) ) ) ) );
@@ -61,7 +61,7 @@
 
         // Insert the data in the DB
 
-        $sql = "INSERT INTO `$tracking_data_db` (`int_id`, `uav_id`, `uav_op_status`, `uav_bat_soc`, `time_epoch`, `pos_cur_lat_dd`, `pos_cur_lng_dd`, `pos_cur_alt_m`, `pos_cur_hdg_deg`, `pos_cur_vel_mps`, `pos_cur_gps_timestamp`, `wp_next_lat_dd`, `wp_next_lng_dd`, `wp_next_alt_m`, `wp_next_hdg_deg`, `wp_next_vel_mps`, `wp_next_eta_epoch`) VALUES (NULL, '$uav_id', '$uav_op_status', '$uav_bat_soc', '$time_epoch', '$pos_cur_lat_dd', '$pos_cur_lng_dd', '$pos_cur_alt_m', '$pos_cur_hdg_deg', '$pos_cur_vel_mps', '$pos_cur_gps_epoch', '$wp_next_lat_dd', '$wp_next_lng_dd', '$wp_next_alt_m', '$wp_next_hdg_deg', '$wp_next_vel_mps', '$wp_next_eta_epoch');";
+        $sql = "INSERT INTO `$tracking_data_db` (`int_id`, `uav_id`, `uav_op_status`, `uav_bat_soc`, `time_epoch`, `pos_cur_lat_dd`, `pos_cur_lng_dd`, `pos_cur_alt_m`, `pos_cur_hdg_deg`, `pos_cur_vel_mps`, `pos_cur_gps_timestamp`, `wp_next_lat_dd`, `wp_next_lng_dd`, `wp_next_alt_m`, `wp_next_hdg_deg`, `wp_next_vel_mps`, `wp_next_eta_epoch`) VALUES (NULL, '$uav_id', '$uav_op_status', '$uav_bat_soc', '$time_epoch', '$pos_cur_lat_dd', '$pos_cur_lng_dd', '$pos_cur_alt_m', '$pos_cur_hdg_deg', '$pos_cur_vel_mps', '$pos_cur_gps_timestamp', '$wp_next_lat_dd', '$wp_next_lng_dd', '$wp_next_alt_m', '$wp_next_hdg_deg', '$wp_next_vel_mps', '$wp_next_eta_epoch');";
 
         $result = mysqli_query($con, $sql);          //query
 
@@ -113,6 +113,12 @@
       }
       $result = mysqli_query($con, $sql);          //query
 
+      if (mysqli_num_rows($result) == 0) {
+        // Set 'Not Found' response code and output 0
+        http_response_code(404);
+        echo 0;
+        die();
+      }
       //echo 'Entries: ' . mysqli_num_rows($result) . '<br>';
       $out_arr = array();
       if (mysqli_num_rows($result) > 0) {
