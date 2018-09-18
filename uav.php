@@ -4,17 +4,17 @@
     if($_SERVER['REQUEST_METHOD'] == 'POST'){
       // Check if everything has been POSTed
       if ( !empty($_POST['uav_name'])
-          && !empty($_POST['operator_name'])
-          && !empty($_POST['operator_phone'])
-          && !empty($_POST['operator_drone_cert'])
           && !empty($_POST['uav_weight_kg'])
           && !empty($_POST['uav_max_vel_mps'])
-          && !empty($_POST['uav_max_endurance_s']) ) { //check if post using isset
+          && !empty($_POST['uav_max_endurance_s'])
+          && !empty($_POST['gdpr_compliance']) ) { //check if post using isset
         //  PASSED CHECKS
         // Require DB config
         require_once('config.php');
         // Require DB functions
         require_once('db_functions.php');
+        // Require crypt functions
+        require_once('crypt.php');
 
         // Connect to DB
         $con = mysqli_connect($mysql_host, $mysql_user, $mysql_pw, $mysql_db);
@@ -24,9 +24,33 @@
 
         // Save post values and SQL sanitise
         $uav_name = mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['uav_name']) ) ) );
-        $operator_name = mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['operator_name']) ) ) );
-        $operator_phone = mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['operator_phone']) ) ) );
-        $operator_drone_cert = mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['operator_drone_cert']) ) ) );
+        // GDPR - START
+        $operator_name = 'Empty due to GDPR';
+        $operator_phone = 'Empty due to GDPR';
+        $operator_drone_cert = 'Empty due to GDPR';
+        $gdpr = mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['gdpr_compliance']) ) ) );
+        if($gdpr == 'yes' || $gdpr == 'y' || $gdpr == 'YES' || $gdpr == 'Y' || $gdpr == 1){
+          if(!empty($_POST['operator_name'])){
+            $operator_name = mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['operator_name']) ) ) );
+            $operator_name = encrypt($operator_name);
+          } else {
+            $operator_name = 'GDPR accept but no input';
+          }
+          if(!empty($_POST['operator_phone'])){
+            $operator_phone = mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['operator_phone']) ) ) );
+            $operator_phone = encrypt($operator_phone);
+          } else {
+            $operator_phone = 'GDPR accept but no input';
+          }
+          if(!empty($_POST['operator_drone_cert'])){
+            $operator_drone_cert = mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['operator_drone_cert']) ) ) );
+            $operator_drone_cert = encrypt($operator_drone_cert);
+          } else {
+            $operator_drone_cert = 'GDPR accept but no input';
+          }
+        }
+        // GDPR - END
+
         $uav_weight_kg = floatval( mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['uav_weight_kg']) ) ) ) );
         $uav_max_vel_mps = floatval( mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['uav_max_vel_mps']) ) ) ) );
         $uav_max_endurance_s = intval( mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['uav_max_endurance_s']) ) ) ) );
@@ -86,14 +110,20 @@
       }
 
       $uav_id = intval( mysqli_real_escape_string($con, trim( strip_tags( addslashes($_GET['uav_id']) ) ) ) );
-      print $uav_id . '<br>';
+      //print $uav_id . '<br>';
 
       $sql = "SELECT * FROM `$uav_data_db` WHERE `uav_id` = '$uav_id' LIMIT 1";
 
       $result = mysqli_query($con, $sql);          //query
 
-      echo 'Entries: ' . mysqli_num_rows($result) . '<br>';
+      //echo 'Entries: ' . mysqli_num_rows($result) . '<br>';
       $out_arr = array();
+      if (mysqli_num_rows($result) == 0) {
+        // Set 'Not Found' response code and output 0
+        http_response_code(404);
+        echo 0;
+        die();
+      }
       if (mysqli_num_rows($result) > 0) {
         while ($row = mysqli_fetch_assoc($result)) {
           //echo 'UAV ID: ' . $row['uav_id'] . ', int ID:' . $row['int_id'] . ', time EPOCH: ' . $row['time_epoch'] . '<br>';
@@ -108,9 +138,8 @@
         }
       }
 
-      print_r($out_arr);
-
-      // Return some data about the UAV ID specified
+      //print_r($out_arr);
+      echo json_encode($out_arr);
       die();
     }
     // DID NOT PASS CHECKS

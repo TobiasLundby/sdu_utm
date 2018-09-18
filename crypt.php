@@ -1,4 +1,6 @@
 <?php
+  // Functions are based on https://www.virendrachandak.com/techtalk/encryption-using-php-openssl/ but modified to fit use case.
+  
   function encrypt($plaintext){
     $plaintext = gzcompress($plaintext);
 
