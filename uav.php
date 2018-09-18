@@ -138,6 +138,9 @@
         }
       }
 
+      // Close DB connection
+      mysqli_close($con);
+
       //print_r($out_arr);
       echo json_encode($out_arr);
       die();

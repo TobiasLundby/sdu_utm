@@ -1,15 +1,15 @@
+# Disable view of all files
+Order Allow,Deny
+Deny from all
+
+# Disable directory browsing
+Options -Indexes
+
 # Deny access to .htaccess
 <Files .htaccess>
 Order allow, deny
 Deny from all
 </Files>
-
-# Disable directory browsing
-Options -Indexes
-
-# Disable view of all files
-Order Allow,Deny
-Deny from all
 
 <FilesMatch "\.(jpg|gif|png|php|html)$">
 Order Deny,Allow
