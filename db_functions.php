@@ -39,7 +39,7 @@
     $var_name = 'drone_id_next';
     $uav_id_next = get_data_from_db_single($var_name, $connection);
     $uav_id_2next = $uav_id_next + 1;
-    $sql = "UPDATE `data` SET `$var_data_db` = '$uav_id_2next' WHERE  `var` = '$var_name'";
+    $sql = "UPDATE `$var_data_db` SET `data` = '$uav_id_2next' WHERE  `var` = '$var_name'";
     $result = mysqli_query($connection, $sql);          //query
     if ($result !== false) {
       return intval($uav_id_next);

@@ -23,13 +23,13 @@
         }
 
         // Save post values and SQL sanitise
-        $uav_name = mysqli_real_escape_string($con, $_POST['uav_name']);
-        $operator_name = mysqli_real_escape_string($con, $_POST['operator_name']);
-        $operator_phone = mysqli_real_escape_string($con, $_POST['operator_phone']);
-        $operator_drone_cert = mysqli_real_escape_string($con, $_POST['operator_drone_cert']);
-        $uav_weight_kg = floatval(mysqli_real_escape_string($con, $_POST['uav_weight_kg']));
-        $uav_max_vel_mps = floatval(mysqli_real_escape_string($con, $_POST['uav_max_vel_mps']));
-        $uav_max_endurance_s = intval(mysqli_real_escape_string($con, $_POST['uav_max_endurance_s']));
+        $uav_name = mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['uav_name']) ) ) );
+        $operator_name = mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['operator_name']) ) ) );
+        $operator_phone = mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['operator_phone']) ) ) );
+        $operator_drone_cert = mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['operator_drone_cert']) ) ) );
+        $uav_weight_kg = floatval( mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['uav_weight_kg']) ) ) ) );
+        $uav_max_vel_mps = floatval( mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['uav_max_vel_mps']) ) ) ) );
+        $uav_max_endurance_s = intval( mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['uav_max_endurance_s']) ) ) ) );
         $ip_addr = $_SERVER['REMOTE_ADDR'];
         $user_agent = $_SERVER['HTTP_USER_AGENT'];
         $protocol = $_SERVER['SERVER_PROTOCOL'];
@@ -69,7 +69,49 @@
         die(); // DIE - Authentication failed - not correct format
       }
     } elseif ($_SERVER['REQUEST_METHOD'] == 'GET') { // Check for GET request
+      if ( !isset($_GET['uav_id']) ){
+        // Set 'Bad Request' response code and output 0
+        http_response_code(400);
+        echo 0;
+        die();
+      }
+
+      // Require DB config
+      require_once('config.php');
+
+      // Connect to DB
+      $con = mysqli_connect($mysql_host, $mysql_user, $mysql_pw, $mysql_db);
+      if (!$con) {
+        die("Connection failed: " . mysqli_connect_error());
+      }
+
+      $uav_id = intval( mysqli_real_escape_string($con, trim( strip_tags( addslashes($_GET['uav_id']) ) ) ) );
+      print $uav_id . '<br>';
+
+      $sql = "SELECT * FROM `$uav_data_db` WHERE `uav_id` = '$uav_id' LIMIT 1";
+
+      $result = mysqli_query($con, $sql);          //query
+
+      echo 'Entries: ' . mysqli_num_rows($result) . '<br>';
+      $out_arr = array();
+      if (mysqli_num_rows($result) > 0) {
+        while ($row = mysqli_fetch_assoc($result)) {
+          //echo 'UAV ID: ' . $row['uav_id'] . ', int ID:' . $row['int_id'] . ', time EPOCH: ' . $row['time_epoch'] . '<br>';
+          //print_r($row);
+          //print_r(array_slice($row,1, 16, true));
+          $row_1st_data = array_slice($row,1, 2, true);
+          $row_2nd_data = array_slice($row,6, 3, true);
+          $row_combined = array_merge($row_1st_data, $row_2nd_data);
+          //$out_arr[] = array_slice($row,1, 8, true);
+          $out_arr[] = $row_combined;
+          //$out_arr[] = $row;
+        }
+      }
+
+      print_r($out_arr);
+
       // Return some data about the UAV ID specified
+      die();
     }
     // DID NOT PASS CHECKS
     // Set 'Bad Request' response code and output 0

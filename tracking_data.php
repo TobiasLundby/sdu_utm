@@ -30,8 +30,8 @@
         }
 
         // Save and sanitise first values to authenticate
-        $uav_id = intval(mysqli_real_escape_string($con, $_POST['uav_id']));
-        $uav_auth_key = mysqli_real_escape_string($con, $_POST['uav_auth_key']);
+        $uav_id = intval(mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['uav_id']) ) ) ) );
+        $uav_auth_key = mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['uav_auth_key']) ) ) );
 
 
         // Check authentication key match with the provided uav_id
@@ -39,25 +39,25 @@
         // Passed authentication
 
         // Save and sanitise values
-        $uav_op_status = intval(mysqli_real_escape_string($con, $_POST['uav_op_status']));
+        $uav_op_status = intval( mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['uav_op_status']) ) ) ) );
         $uav_bat_soc = -1;
         if(!empty($_POST['uav_bat_soc'])){
-          $uav_bat_soc = floatval(mysqli_real_escape_string($con, $_POST['uav_bat_soc']));
+          $uav_bat_soc = floatval( mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['uav_bat_soc']) ) ) ) );
         }
 
-        $pos_cur_lat_dd = floatval(mysqli_real_escape_string($con, $_POST['pos_cur_lat_dd']));
-        $pos_cur_lng_dd = floatval(mysqli_real_escape_string($con, $_POST['pos_cur_lng_dd']));
-        $pos_cur_alt_m = floatval(mysqli_real_escape_string($con, $_POST['pos_cur_alt_m']));
-        $pos_cur_hdg_deg = floatval(mysqli_real_escape_string($con, $_POST['pos_cur_hdg_deg']));
-        $pos_cur_vel_mps = floatval(mysqli_real_escape_string($con, $_POST['pos_cur_vel_mps']));
-        $pos_cur_gps_epoch = intval(mysqli_real_escape_string($con, $_POST['pos_cur_gps_epoch']));
+        $pos_cur_lat_dd = floatval( mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['pos_cur_lat_dd']) ) ) ) );
+        $pos_cur_lng_dd = floatval( mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['pos_cur_lng_dd']) ) ) ) );
+        $pos_cur_alt_m = floatval( mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['pos_cur_alt_m']) ) ) ) );
+        $pos_cur_hdg_deg = floatval( mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['pos_cur_hdg_deg']) ) ) ) );
+        $pos_cur_vel_mps = floatval( mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['pos_cur_vel_mps']) ) ) ) );
+        $pos_cur_gps_epoch = intval( mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['pos_cur_gps_epoch']) ) ) ) );
 
-        $wp_next_lat_dd = floatval(mysqli_real_escape_string($con, $_POST['wp_next_lat_dd']));
-        $wp_next_lng_dd = floatval(mysqli_real_escape_string($con, $_POST['wp_next_lng_dd']));
-        $wp_next_alt_m = floatval(mysqli_real_escape_string($con, $_POST['wp_next_alt_m']));
-        $wp_next_hdg_deg = floatval(mysqli_real_escape_string($con, $_POST['wp_next_hdg_deg']));
-        $wp_next_vel_mps = floatval(mysqli_real_escape_string($con, $_POST['wp_next_vel_mps']));
-        $wp_next_eta_epoch = floatval(mysqli_real_escape_string($con, $_POST['wp_next_eta_epoch']));
+        $wp_next_lat_dd = floatval( mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['wp_next_lat_dd']) ) ) ) );
+        $wp_next_lng_dd = floatval( mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['wp_next_lng_dd']) ) ) ) );
+        $wp_next_alt_m = floatval( mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['wp_next_alt_m']) ) ) ) );
+        $wp_next_hdg_deg = floatval( mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['wp_next_hdg_deg']) ) ) ) );
+        $wp_next_vel_mps = floatval( mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['wp_next_vel_mps']) ) ) ) );
+        $wp_next_eta_epoch = floatval( mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['wp_next_eta_epoch']) ) ) ) );
 
         // Insert the data in the DB
 
@@ -98,7 +98,7 @@
       // Get the time variable
       $time_delta_s = $time_delta_default_s; // 2 mins
       if ( isset($_GET['time_delta_s']) ){
-        $time_delta_s = intval( mysqli_real_escape_string($con, $_GET['time_delta_s']) );
+        $time_delta_s = intval( mysqli_real_escape_string($con, trim( strip_tags( addslashes($_GET['time_delta_s']) ) ) ) );
         if($time_delta_s > $time_delta_max_s){$time_delta_s = $time_delta_max_s;}
       }
 
