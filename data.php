@@ -44,6 +44,19 @@
               $sql = "SELECT * FROM `$dynamic_no_fly_db` WHERE `valid_to_epoch` < $time_epoch ORDER BY `int_id` ASC";
               $result = mysqli_query($con, $sql);          //query
 
+              // Check result
+              if($result == false){
+                // Close DB connection
+                mysqli_close($con);
+                // Set content type header to support data
+                $mimetype = 'text/plain';//"mime/type";
+                header("Content-Type: " . $mimetype );
+                // Set 'Internal Server Error' response code and output 0
+                http_response_code(500);
+                echo 0;
+                die(); // DIE
+              }
+
               $no_non_active_zones = mysqli_num_rows($result);
               $zone_to_activate = rand(0,$no_non_active_zones-1);
               //echo 'Non-active zones: ' . $no_non_active_zones . '<br>';
@@ -78,6 +91,19 @@
             $sql = "SELECT * FROM `$dynamic_no_fly_db` WHERE `valid_from_epoch` <= $time_epoch AND `valid_to_epoch` >= $time_epoch ORDER BY `valid_from_epoch` ASC";
             $result = mysqli_query($con, $sql);          //query
 
+            // Check result
+            if($result == false){
+              // Close DB connection
+              mysqli_close($con);
+              // Set content type header to support data
+              $mimetype = 'text/plain';//"mime/type";
+              header("Content-Type: " . $mimetype );
+              // Set 'Internal Server Error' response code and output 0
+              http_response_code(500);
+              echo 0;
+              die(); // DIE
+            }
+
             // Make array with zones for output
             if (mysqli_num_rows($result) > 0) {
               while ($row = mysqli_fetch_assoc($result)) {
@@ -96,6 +122,9 @@
           // Close DB connection
           mysqli_close($con);
 
+          // Set content type header to support data
+          $mimetype = 'application/json';//"mime/type";
+          header("Content-Type: " . $mimetype );
           // Return the data as JSON
           echo json_encode($out_arr);
           die();
@@ -113,8 +142,25 @@
 
           $result = mysqli_query($con, $sql);          //query
 
+          // Close DB connection
+          mysqli_close($con);
+
+          // Check result
+          if($result == false){
+            // Set content type header to support data
+            $mimetype = 'text/plain';//"mime/type";
+            header("Content-Type: " . $mimetype );
+            // Set 'Internal Server Error' response code and output 0
+            http_response_code(500);
+            echo 0;
+            die(); // DIE
+          }
+
           $out_arr = array();
           if (mysqli_num_rows($result) == 0) { // Check if no results
+            // Set content type header to support data
+            $mimetype = 'text/plain';//"mime/type";
+            header("Content-Type: " . $mimetype );
             // Set 'Not Found' response code and output 0
             http_response_code(404);
             echo 0;
@@ -126,9 +172,9 @@
             }
           }
 
-          // Close DB connection
-          mysqli_close($con);
-
+          // Set content type header to support data
+          $mimetype = 'application/json';//"mime/type";
+          header("Content-Type: " . $mimetype );
           // Return the data as JSON
           echo json_encode($out_arr);
           die();
@@ -165,23 +211,35 @@
           	$out_arr[] = $line_csv_keys ;
           }
 
+          // Set content type header to support data
+          $mimetype = 'application/json';//"mime/type";
+          header("Content-Type: " . $mimetype );
           // Return the data as JSON
           echo json_encode($out_arr);
 
           die();
 
         } elseif ($data_type == 'server_time') {
+          // Set content type header to support data
+          $mimetype = 'text/plain';//"mime/type";
+          header("Content-Type: " . $mimetype );
           echo $time_epoch;
           die();
 
         }
       }
     }
+    // Set content type header to support data
+    $mimetype = 'text/plain';//"mime/type";
+    header("Content-Type: " . $mimetype );
     // Set 'Bad Request' response code and output 0
     http_response_code(400);
     echo 0;
     die();
   } else { // NO TLS
+    // Set content type header to support data
+    $mimetype = 'text/plain';//"mime/type";
+    header("Content-Type: " . $mimetype );
     // Set 'HTTP Version not supported' response code and output 0
     http_response_code(505);
     echo 0;

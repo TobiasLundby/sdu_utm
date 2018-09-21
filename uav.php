@@ -75,11 +75,14 @@
 
         // Check result
         if($result !== false){
+          // Set content type header to support data
+          $mimetype = 'application/json';//"mime/type";
+          header("Content-Type: " . $mimetype );
           // Set 'Created' response code
           http_response_code(201);
           // Send generated data to user
           $array_out = array(
-            "uav_id" => $uav_id,
+            "uav_id" => intval($uav_id),
             "uav_auth_key" => $hash_string,
           );
           echo json_encode($array_out);
@@ -87,6 +90,10 @@
         }
         // Close DB connection
         mysqli_close($connection);
+
+        // Set content type header to support data
+        $mimetype = 'text/plain';//"mime/type";
+        header("Content-Type: " . $mimetype );
         // Set 'Internal Server Error' response code and output 0
         http_response_code(500);
         echo 0;
@@ -94,6 +101,9 @@
       }
     } elseif ($_SERVER['REQUEST_METHOD'] == 'GET') { // Check for GET request
       if ( !isset($_GET['uav_id']) ){
+        // Set content type header to support data
+        $mimetype = 'text/plain';//"mime/type";
+        header("Content-Type: " . $mimetype );
         // Set 'Bad Request' response code and output 0
         http_response_code(400);
         echo 0;
@@ -116,9 +126,26 @@
 
       $result = mysqli_query($con, $sql);          //query
 
+      // Close DB connection
+      mysqli_close($con);
+
+      // Check result
+      if($result == false){
+        // Set content type header to support data
+        $mimetype = 'text/plain';//"mime/type";
+        header("Content-Type: " . $mimetype );
+        // Set 'Internal Server Error' response code and output 0
+        http_response_code(500);
+        echo 0;
+        die(); // DIE
+      }
+
       //echo 'Entries: ' . mysqli_num_rows($result) . '<br>';
       $out_arr = array();
       if (mysqli_num_rows($result) == 0) {
+        // Set content type header to support data
+        $mimetype = 'text/plain';//"mime/type";
+        header("Content-Type: " . $mimetype );
         // Set 'Not Found' response code and output 0
         http_response_code(404);
         echo 0;
@@ -133,24 +160,35 @@
           $row_2nd_data = array_slice($row,6, 3, true);
           $row_combined = array_merge($row_1st_data, $row_2nd_data);
           //$out_arr[] = array_slice($row,1, 8, true);
+          $row_combined['uav_id'] = intval($row_combined['uav_id']);
+          $row_combined['uav_weight_kg'] = intval($row_combined['uav_weight_kg']);
+          $row_combined['uav_max_vel_mps'] = floatval($row_combined['uav_max_vel_mps']);
+          $row_combined['uav_max_endurance_s'] = floatval($row_combined['uav_max_endurance_s']);
           $out_arr[] = $row_combined;
           //$out_arr[] = $row;
         }
       }
 
-      // Close DB connection
-      mysqli_close($con);
+      // Set content type header to support data
+      $mimetype = 'application/json';//"mime/type";
+      header("Content-Type: " . $mimetype );
 
       //print_r($out_arr);
       echo json_encode($out_arr);
       die();
     }
     // DID NOT PASS CHECKS
+    // Set content type header to support data
+    $mimetype = 'text/plain';//"mime/type";
+    header("Content-Type: " . $mimetype );
     // Set 'Bad Request' response code and output 0
     http_response_code(400);
     echo 0;
     die();
   } else { // NO TLS
+    // Set content type header to support data
+    $mimetype = 'text/plain';//"mime/type";
+    header("Content-Type: " . $mimetype );
     // Set 'HTTP Version not supported' response code and output 0
     http_response_code(505);
     echo 0;
