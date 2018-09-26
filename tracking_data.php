@@ -83,7 +83,9 @@
             );
             $context  = stream_context_create($options);
             $result = file_get_contents($drone_id_post_url, false, $context);
-            if ($result === FALSE) {
+
+            // Check the result (the stripped result should be 'OK')
+            if ($result === FALSE || trim( strip_tags($result) ) !== 'OK') {
               // Set content type header to support data
               $mimetype = 'text/plain';//"mime/type";
               header("Content-Type: " . $mimetype );
@@ -174,92 +176,148 @@
           //echo 'UAV ID: ' . $row['uav_id'] . ', int ID:' . $row['int_id'] . ', time EPOCH: ' . $row['time_epoch'] . '<br>';
           //print_r($row);
           //print_r(array_slice($row,1, 16, true));
+          $row['int_id'] = intval($row['int_id']);
+          $row['uav_id'] = intval($row['uav_id']);
+          $row['uav_op_status'] = intval($row['uav_op_status']);
+          $row['uav_bat_soc'] = floatval($row['uav_bat_soc']);
+          $row['time_epoch'] = intval($row['time_epoch']);
+          $row['pos_cur_lat_dd'] = floatval($row['pos_cur_lat_dd']);
+          $row['pos_cur_lng_dd'] = floatval($row['pos_cur_lng_dd']);
+          $row['pos_cur_alt_m'] = floatval($row['pos_cur_alt_m']);
+          $row['pos_cur_hdg_deg'] = floatval($row['pos_cur_hdg_deg']);
+          $row['pos_cur_vel_mps'] = floatval($row['pos_cur_vel_mps']);
+          $row['pos_cur_gps_timestamp'] = intval($row['pos_cur_gps_timestamp']);
+          $row['wp_next_lat_dd'] = floatval($row['wp_next_lat_dd']);
+          $row['wp_next_lng_dd'] = floatval($row['wp_next_lng_dd']);
+          $row['wp_next_alt_m'] = floatval($row['wp_next_alt_m']);
+          $row['wp_next_hdg_deg'] = floatval($row['wp_next_hdg_deg']);
+          $row['wp_next_vel_mps'] = floatval($row['wp_next_vel_mps']);
+          $row['wp_next_eta_epoch'] = intval($row['wp_next_eta_epoch']);
+
           $out_arr[] = array_slice($row,1, 16, true);
-          //$out_arr[] = $row;
         }
       }
 
+      // echo '\n--------out arr\n';
+      //
+      // var_dump($out_arr);
+      //
+      // echo '\n--------\n';
+
       $csv = explode("\n", trim( strip_tags( file_get_contents('https://droneid.dk/tobias/droneid.php') ) ) );
-      #var_dump($csv);
+      // if ($csv[0] != "") {
+      //   echo '\n--------csv\n';
+      //   var_dump($csv);
+      //   echo '\n--------\n';
+      // }
 
-      echo '\n\n';
+      if ($csv[0] != "") {
+        if (count($out_arr) > 0) {
+          //echo '\n\n There is data in the DB';
+          $entry_template_w_keys = $out_arr[0];
+          $entry_template_w_keys['uav_op_status'] = -1;
+          $entry_template_w_keys['uav_bat_soc'] = -1;
+          $entry_template_w_keys['pos_cur_hdg_deg'] = -1;
+          $entry_template_w_keys['pos_cur_vel_mps'] = -1;
+          $entry_template_w_keys['pos_cur_gps_timestamp'] = -1;
+          $entry_template_w_keys['wp_next_lat_dd'] = -1;
+          $entry_template_w_keys['wp_next_lng_dd'] = -1;
+          $entry_template_w_keys['wp_next_alt_m'] = -1;
+          $entry_template_w_keys['wp_next_hdg_deg'] = -1;
+          $entry_template_w_keys['wp_next_vel_mps'] = -1;
+          $entry_template_w_keys['wp_next_eta_epoch'] = -1;
+          //print_r($entry_template_w_keys);
 
-      // Make key array to combine with the data
-      $keys_droneID = array(
-        "0" => "timestamp",
-        "1" => "timestamp_epoch",
-        "2" => "uav_id",
-        "3" => "uav_name",
-        "4" => "pos_cur_lat_dd",
-        "5" => "pos_cur_lng_dd",
-        "6" => "pos_cur_alt_m",
-        "7" => "acc_pct",
-        "8" => "fix_type",
-        "9" => "lnk_pct",
-        "10" => "tracker_bat_soc_pct",
-        "11" => "sim"
-      );
+          foreach ($csv as $key => $line) {
+            $line_csv = str_getcsv($line);
+            // echo '\n--------\n';
+            // print_r($line_csv);
+            $entry_template_w_keys['uav_id'] = intval($line_csv[2]);
+            $entry_template_w_keys['time_epoch'] = intval($line_csv[1]);
+            $entry_template_w_keys['pos_cur_lat_dd'] = floatval($line_csv[4]);
+            $entry_template_w_keys['pos_cur_lng_dd'] = floatval($line_csv[5]);
+            $entry_template_w_keys['pos_cur_alt_m'] = floatval($line_csv[6]);
 
-      $keys_db = array(
-        "0" => "uav_id",
-        "1" => "uav_op_status",
-        "2" => "uav_bat_soc",
-        "3" => "time_epoch",
-        "4" => "pos_cur_lat_dd",
-        "5" => "pos_cur_lng_dd",
-        "6" => "pos_cur_alt_m",
-        "7" => "pos_cur_hdg_deg",
-        "8" => "pos_cur_vel_mps",
-        "9" => "pos_cur_gps_timestamp",
-        "10" => "wp_next_lat_dd",
-        "11" => "wp_next_lng_dd",
-        "12" => "wp_next_alt_m",
-        "13" => "wp_next_hdg_deg",
-        "14" => "wp_next_vel_mps",
-        "15" => "wp_next_eta_epoch"
-      );
+            // echo '\n--------\n';
+            // print_r($entry_template_w_keys);
 
-      $entry_template = $out_arr[0];
-      $entry_template['uav_op_status'] = -1;
-      $entry_template['uav_bat_soc'] = -1;
-      $entry_template['pos_cur_hdg_deg'] = -1;
-      $entry_template['pos_cur_vel_mps'] = -1;
-      $entry_template['pos_cur_gps_timestamp'] = -1;
-      $entry_template['wp_next_lat_dd'] = -1;
-      $entry_template['wp_next_lng_dd'] = -1;
-      $entry_template['wp_next_alt_m'] = -1;
-      $entry_template['wp_next_hdg_deg'] = -1;
-      $entry_template['wp_next_vel_mps'] = -1;
-      $entry_template['wp_next_eta_epoch'] = -1;
-      print_r($entry_template);
+            // $line_csv_keys = array_combine($keys, $line_csv);
+            // $line_csv_keys['timestamp_epoch'] = intval($line_csv_keys['timestamp_epoch']);
+            // $line_csv_keys['lat_dd'] = floatval($line_csv_keys['lat_dd']);
+            // $line_csv_keys['lng_dd'] = floatval($line_csv_keys['lng_dd']);
+            // $line_csv_keys['alt_m'] = intval($line_csv_keys['alt_m']);
+            // $line_csv_keys['hdg_deg'] = intval($line_csv_keys['hdg_deg']);
+            // $line_csv_keys['vel_mps'] = intval($line_csv_keys['vel_mps']);
+            $add_entry = True;
+            foreach ($out_arr as &$value) {
+              if ($value['uav_id'] == $entry_template_w_keys['uav_id']) {
+                $add_entry = False;
+              }
+            }
+            if ($add_entry) {
+              $out_arr[] = $entry_template_w_keys ;
+            } else {
+              echo 'already in out_arr';
+            }
+          }
+        } else {
+          //echo '\n\n There is NO data in the DB';
+          $keys_db = array(
+            "0" => "uav_id",
+            "1" => "uav_op_status",
+            "2" => "uav_bat_soc",
+            "3" => "time_epoch",
+            "4" => "pos_cur_lat_dd",
+            "5" => "pos_cur_lng_dd",
+            "6" => "pos_cur_alt_m",
+            "7" => "pos_cur_hdg_deg",
+            "8" => "pos_cur_vel_mps",
+            "9" => "pos_cur_gps_timestamp",
+            "10" => "wp_next_lat_dd",
+            "11" => "wp_next_lng_dd",
+            "12" => "wp_next_alt_m",
+            "13" => "wp_next_hdg_deg",
+            "14" => "wp_next_vel_mps",
+            "15" => "wp_next_eta_epoch"
+          );
+          $entry_template = array(
+            "0" => 0,
+            "1" => -1,
+            "2" => -1,
+            "3" => 0,
+            "4" => 0,
+            "5" => 0,
+            "6" => 0,
+            "7" => -1,
+            "8" => -1,
+            "9" => -1,
+            "10" => -1,
+            "11" => -1,
+            "12" => -1,
+            "13" => -1,
+            "14" => -1,
+            "15" => -1
+          );
+          $entry_template_w_keys = array_combine($keys_db, $entry_template);
 
-      // Remember to handle if THERE IS NO DATA IN THE DB!! NOTE TODO
+          foreach ($csv as $key => $line) {
+            $line_csv = str_getcsv($line);
+            // echo '\n-------- making entry \n';
+            // print_r($line_csv);
+            $entry_template_w_keys['uav_id'] = intval($line_csv[2]);
+            $entry_template_w_keys['time_epoch'] = intval($line_csv[1]);
+            $entry_template_w_keys['pos_cur_lat_dd'] = floatval($line_csv[4]);
+            $entry_template_w_keys['pos_cur_lng_dd'] = floatval($line_csv[5]);
+            $entry_template_w_keys['pos_cur_alt_m'] = floatval($line_csv[6]);
 
-      // Make array from data with keys
-      //$out_arr = array();
-      foreach ($csv as $key => $line) {
-        $line_csv = str_getcsv($line);
-        echo '\n\n----';
-        print_r($line_csv);
-        $entry_template['uav_id'] = $line_csv[2];
-        $entry_template['time_epoch'] = $line_csv[1];
-        $entry_template['pos_cur_lat_dd'] = $line_csv[4];
-        $entry_template['pos_cur_lng_dd'] = $line_csv[5];
-        $entry_template['pos_cur_alt_m'] = $line_csv[6];
-
-        // $line_csv_keys = array_combine($keys, $line_csv);
-        // $line_csv_keys['timestamp_epoch'] = intval($line_csv_keys['timestamp_epoch']);
-        // $line_csv_keys['lat_dd'] = floatval($line_csv_keys['lat_dd']);
-        // $line_csv_keys['lng_dd'] = floatval($line_csv_keys['lng_dd']);
-        // $line_csv_keys['alt_m'] = intval($line_csv_keys['alt_m']);
-        // $line_csv_keys['hdg_deg'] = intval($line_csv_keys['hdg_deg']);
-        // $line_csv_keys['vel_mps'] = intval($line_csv_keys['vel_mps']);
-        $out_arr[] = $entry_template ;
+            $out_arr[] = $entry_template_w_keys;
+          }
+        }
       }
-      echo '\n\n----';
-      var_dump($out_arr);
-
-      die();
+      // echo '\n--------final\n';
+      // var_dump($out_arr);
+      //
+      // die();
 
       // Set content type header to support data
       $mimetype = 'application/json';//"mime/type";
