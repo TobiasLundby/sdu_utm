@@ -61,7 +61,7 @@ if __name__ == '__main__':
         print colored('\nTrying to register UAV and operator...', 'yellow')
         r = ''
         try:
-            r = requests.post(url = 'https://localhost/ext/sdu_utm/uav.php', data = payload, verify=False, timeout=2) # TODO remove verify false
+            r = requests.post(url = 'https://droneid.dk/rmuasd/utm/uav.php', data = payload, timeout=2)
             r.raise_for_status()
         except requests.exceptions.Timeout:
     	    # Maybe set up for a retry, or continue in a retry loop

@@ -160,22 +160,11 @@
         die(); // DIE
       }
 
-      // if (mysqli_num_rows($result) == 0) {
-      //   // Set content type header to support data
-      //   $mimetype = 'text/plain';//"mime/type";
-      //   header("Content-Type: " . $mimetype );
-      //   // Set 'Not Found' response code and output 0
-      //   http_response_code(404);
-      //   echo 0;
-      //   die();
-      // }
       //echo 'Entries: ' . mysqli_num_rows($result) . '<br>';
       $out_arr = array();
       if (mysqli_num_rows($result) > 0) {
         while ($row = mysqli_fetch_assoc($result)) {
           //echo 'UAV ID: ' . $row['uav_id'] . ', int ID:' . $row['int_id'] . ', time EPOCH: ' . $row['time_epoch'] . '<br>';
-          //print_r($row);
-          //print_r(array_slice($row,1, 16, true));
           $row['int_id'] = intval($row['int_id']);
           $row['uav_id'] = intval($row['uav_id']);
           $row['uav_op_status'] = intval($row['uav_op_status']);
@@ -198,22 +187,12 @@
         }
       }
 
-      // echo '\n--------out arr\n';
-      //
-      // var_dump($out_arr);
-      //
-      // echo '\n--------\n';
+      // Download data from DroneID
+      $csv = explode("\n", trim( strip_tags( file_get_contents($drone_id_get_url) ) ) );
 
-      $csv = explode("\n", trim( strip_tags( file_get_contents('https://droneid.dk/tobias/droneid.php') ) ) );
-      // if ($csv[0] != "") {
-      //   echo '\n--------csv\n';
-      //   var_dump($csv);
-      //   echo '\n--------\n';
-      // }
-
-      if ($csv[0] != "") {
+      if ($csv[0] != "") { // Check if there is any data from DroneID
         if (count($out_arr) > 0) {
-          //echo '\n\n There is data in the DB';
+          // There is data in the DB so use that as a template for DroneID data parsing
           $entry_template_w_keys = $out_arr[0];
           $entry_template_w_keys['uav_op_status'] = -1;
           $entry_template_w_keys['uav_bat_soc'] = -1;
@@ -226,42 +205,30 @@
           $entry_template_w_keys['wp_next_hdg_deg'] = -1;
           $entry_template_w_keys['wp_next_vel_mps'] = -1;
           $entry_template_w_keys['wp_next_eta_epoch'] = -1;
-          //print_r($entry_template_w_keys);
 
-          foreach ($csv as $key => $line) {
+          foreach ($csv as $key => $line) { // Loop through all of the DroneID entries
             $line_csv = str_getcsv($line);
-            // echo '\n--------\n';
-            // print_r($line_csv);
             $entry_template_w_keys['uav_id'] = intval($line_csv[2]);
             $entry_template_w_keys['time_epoch'] = intval($line_csv[1]);
             $entry_template_w_keys['pos_cur_lat_dd'] = floatval($line_csv[4]);
             $entry_template_w_keys['pos_cur_lng_dd'] = floatval($line_csv[5]);
             $entry_template_w_keys['pos_cur_alt_m'] = floatval($line_csv[6]);
 
-            // echo '\n--------\n';
-            // print_r($entry_template_w_keys);
-
-            // $line_csv_keys = array_combine($keys, $line_csv);
-            // $line_csv_keys['timestamp_epoch'] = intval($line_csv_keys['timestamp_epoch']);
-            // $line_csv_keys['lat_dd'] = floatval($line_csv_keys['lat_dd']);
-            // $line_csv_keys['lng_dd'] = floatval($line_csv_keys['lng_dd']);
-            // $line_csv_keys['alt_m'] = intval($line_csv_keys['alt_m']);
-            // $line_csv_keys['hdg_deg'] = intval($line_csv_keys['hdg_deg']);
-            // $line_csv_keys['vel_mps'] = intval($line_csv_keys['vel_mps']);
-            $add_entry = True;
-            foreach ($out_arr as &$value) {
-              if ($value['uav_id'] == $entry_template_w_keys['uav_id']) {
-                $add_entry = False;
+            if ($entry_template_w_keys['time_epoch'] >= $time_interval_low) {
+              // Check if data is already present in the output array made from DB data
+              $add_entry = True;
+              foreach ($out_arr as &$value) {
+                if ($value['uav_id'] == $entry_template_w_keys['uav_id']) {
+                  $add_entry = False;
+                }
               }
-            }
-            if ($add_entry) {
-              $out_arr[] = $entry_template_w_keys ;
-            } else {
-              echo 'already in out_arr';
+              if ($add_entry) { // Add the DroneID entry if not already in the output array made from DB data
+                $out_arr[] = $entry_template_w_keys ;
+              }
             }
           }
         } else {
-          //echo '\n\n There is NO data in the DB';
+          // There is no data in the DB so make array format from scratch
           $keys_db = array(
             "0" => "uav_id",
             "1" => "uav_op_status",
@@ -298,19 +265,19 @@
             "14" => -1,
             "15" => -1
           );
-          $entry_template_w_keys = array_combine($keys_db, $entry_template);
+          $entry_template_w_keys = array_combine($keys_db, $entry_template); // Combine the arrays
 
-          foreach ($csv as $key => $line) {
+          foreach ($csv as $key => $line) { // Loop through all of the DroneID entries
             $line_csv = str_getcsv($line);
-            // echo '\n-------- making entry \n';
-            // print_r($line_csv);
             $entry_template_w_keys['uav_id'] = intval($line_csv[2]);
             $entry_template_w_keys['time_epoch'] = intval($line_csv[1]);
             $entry_template_w_keys['pos_cur_lat_dd'] = floatval($line_csv[4]);
             $entry_template_w_keys['pos_cur_lng_dd'] = floatval($line_csv[5]);
             $entry_template_w_keys['pos_cur_alt_m'] = floatval($line_csv[6]);
 
-            $out_arr[] = $entry_template_w_keys;
+            if ($entry_template_w_keys['time_epoch'] >= $time_interval_low) {
+              $out_arr[] = $entry_template_w_keys;
+            }
           }
         }
       }
@@ -318,6 +285,17 @@
       // var_dump($out_arr);
       //
       // die();
+
+      if (count($out_arr) == 0) {
+        // Set content type header to support data
+        $mimetype = 'text/plain';//"mime/type";
+        header("Content-Type: " . $mimetype );
+        // Set 'Not Found' response code and output 0
+        http_response_code(404);
+        echo 0;
+        die();
+      }
+
 
       // Set content type header to support data
       $mimetype = 'application/json';//"mime/type";

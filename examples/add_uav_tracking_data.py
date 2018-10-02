@@ -23,8 +23,8 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 if __name__ == '__main__':
     payload = {
-        'uav_id': 940,
-        'uav_auth_key': '7e85d15f7ab6297a073cdebfb7be1eb9043d55373056f3ef29b2ad032a4c1383f7e893d91be8198a76f73747cfe8c81ad62ca772889f7613ebb8b496e6583ca8',
+        'uav_id': 3000,
+        'uav_auth_key': 'abcd1234',
         'uav_op_status': 3,
         'pos_cur_lat_dd': 55.371653,
         'pos_cur_lng_dd': 10.428223,
@@ -44,7 +44,7 @@ if __name__ == '__main__':
         print colored('Trying to POST the data...', 'yellow')
         r = ''
         try:
-            r = requests.post(url = 'https://localhost/ext/sdu_utm/tracking_data.php', data = payload, verify=False, timeout=2) # TODO remove verify false
+            r = requests.post(url = 'https://droneid.dk/rmuasd/utm/tracking_data.php', data = payload, timeout=2)
             r.raise_for_status()
         except requests.exceptions.Timeout:
     	    # Maybe set up for a retry, or continue in a retry loop

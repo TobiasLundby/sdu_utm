@@ -22,11 +22,11 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 if __name__ == '__main__':
     payload = {
-        'uav_id': 941
+        'uav_id': 3000
     }
     r = ''
     try:
-        r = requests.get(url = 'https://localhost/ext/sdu_utm/uav.php', params = payload, verify=False, timeout=2) # TODO remove verify false
+        r = requests.get(url = 'https://droneid.dk/rmuasd/utm/uav.php', params = payload, timeout=2)
         r.raise_for_status()
     except requests.exceptions.Timeout:
 	    # Maybe set up for a retry, or continue in a retry loop
