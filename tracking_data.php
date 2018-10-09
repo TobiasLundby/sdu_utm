@@ -40,7 +40,7 @@
 
         // Save and sanitise values
         $uav_op_status = intval( mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['uav_op_status']) ) ) ) );
-        if ($uav_op_status < $op_stat_min_allowed && $uav_op_status > $op_stat_max_allowed) {
+        if ($uav_op_status < $op_stat_min_allowed || $uav_op_status > $op_stat_max_allowed) {
           // Only operation status >= 0 are accepted for submission
           // Close DB connection
           mysqli_close($con);
