@@ -40,6 +40,18 @@
 
         // Save and sanitise values
         $uav_op_status = intval( mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['uav_op_status']) ) ) ) );
+        if ($uav_op_status < $op_stat_min_allowed && $uav_op_status > $op_stat_max_allowed) {
+          // Only operation status >= 0 are accepted for submission
+          // Close DB connection
+          mysqli_close($con);
+          // Set content type header to support data
+          $mimetype = 'text/plain';//"mime/type";
+          header("Content-Type: " . $mimetype );
+          // Set 'Bad Request' response code and output 0
+          http_response_code(400);
+          echo 0;
+          die();
+        }
         $uav_bat_soc = -1;
         if(!empty($_POST['uav_bat_soc'])){
           $uav_bat_soc = floatval( mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['uav_bat_soc']) ) ) ) );
@@ -194,7 +206,7 @@
         if (count($out_arr) > 0) {
           // There is data in the DB so use that as a template for DroneID data parsing
           $entry_template_w_keys = $out_arr[0];
-          $entry_template_w_keys['uav_op_status'] = -1;
+          $entry_template_w_keys['uav_op_status'] = $op_stat_unkown;
           $entry_template_w_keys['uav_bat_soc'] = -1;
           $entry_template_w_keys['pos_cur_hdg_deg'] = -1;
           $entry_template_w_keys['pos_cur_vel_mps'] = -1;

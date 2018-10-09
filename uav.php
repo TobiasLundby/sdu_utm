@@ -7,7 +7,10 @@
           && !empty($_POST['uav_weight_kg'])
           && !empty($_POST['uav_max_vel_mps'])
           && !empty($_POST['uav_max_endurance_s'])
-          && !empty($_POST['gdpr_compliance']) ) { //check if post using isset
+          && !empty($_POST['gdpr_compliance'])
+          && !empty($_POST['operator_name'])
+          && !empty($_POST['operator_phone'])
+          && !empty($_POST['operator_drone_cert'])) { //check if post using isset
         //  PASSED CHECKS
         // Require DB config
         require_once('config.php');
@@ -24,30 +27,33 @@
 
         // Save post values and SQL sanitise
         $uav_name = mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['uav_name']) ) ) );
+
         // GDPR - START
-        $operator_name = 'Empty due to GDPR';
-        $operator_phone = 'Empty due to GDPR';
-        $operator_drone_cert = 'Empty due to GDPR';
+        $operator_name = '';
+        $operator_phone = '';
+        $operator_drone_cert = '';
         $gdpr = mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['gdpr_compliance']) ) ) );
         if($gdpr == 'yes' || $gdpr == 'y' || $gdpr == 'YES' || $gdpr == 'Y' || $gdpr == 1){
-          if(!empty($_POST['operator_name'])){
-            $operator_name = mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['operator_name']) ) ) );
-            $operator_name = encrypt($operator_name);
-          } else {
-            $operator_name = 'GDPR accept but no input';
-          }
-          if(!empty($_POST['operator_phone'])){
-            $operator_phone = mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['operator_phone']) ) ) );
-            $operator_phone = encrypt($operator_phone);
-          } else {
-            $operator_phone = 'GDPR accept but no input';
-          }
-          if(!empty($_POST['operator_drone_cert'])){
-            $operator_drone_cert = mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['operator_drone_cert']) ) ) );
-            $operator_drone_cert = encrypt($operator_drone_cert);
-          } else {
-            $operator_drone_cert = 'GDPR accept but no input';
-          }
+          // GDPR accept so get the POST data and encrypt it
+          $operator_name = mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['operator_name']) ) ) );
+          $operator_name = encrypt($operator_name);
+
+          $operator_phone = mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['operator_phone']) ) ) );
+          $operator_phone = encrypt($operator_phone);
+
+          $operator_drone_cert = mysqli_real_escape_string($con, trim( strip_tags( addslashes($_POST['operator_drone_cert']) ) ) );
+          $operator_drone_cert = encrypt($operator_drone_cert);
+        } else {
+          // GDPR not accepted so stop and generate error header
+          // Close DB connection
+          mysqli_close($con);
+          // Set content type header to support data
+          $mimetype = 'text/plain';//"mime/type";
+          header("Content-Type: " . $mimetype );
+          // Set 'Bad Request' response code and output 0
+          http_response_code(400);
+          echo 0;
+          die();
         }
         // GDPR - END
 
@@ -88,8 +94,6 @@
           echo json_encode($array_out);
           die();
         }
-        // Close DB connection
-        mysqli_close($connection);
 
         // Set content type header to support data
         $mimetype = 'text/plain';//"mime/type";
