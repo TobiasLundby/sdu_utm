@@ -82,7 +82,7 @@
 
         // Check result
         if($result !== false){
-          if ($drone_id_forward) {
+          if ($drone_id_forward && ($uav_id >= $drone_id_min && $uav_id <= $drone_id_max) ) {
             $data = array('aid' => $uav_id, 'lat' => $pos_cur_lat_dd, 'lon' => $pos_cur_lng_dd, 'alt' => $pos_cur_alt_m);
 
             // use key 'http' even if you send the request to https://...
