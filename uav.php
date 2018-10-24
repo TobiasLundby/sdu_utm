@@ -72,6 +72,46 @@
         // DB code here
         $uav_id = get_next_uav_id_and_incr($con);
 
+        while (true) {
+          $sql = "SELECT * FROM `$uav_data_db` WHERE `uav_id` = '$uav_id' LIMIT 1";
+
+          $result = mysqli_query($con, $sql);          //query
+
+          // Check result
+          if($result == false){
+            // Close DB connection
+            mysqli_close($con);
+            // Set content type header to support data
+            $mimetype = 'text/plain';//"mime/type";
+            header("Content-Type: " . $mimetype );
+            // Set 'Internal Server Error' response code and output 0
+            http_response_code(500);
+            echo 0;
+            die(); // DIE
+          }
+
+          //echo 'Entries: ' . mysqli_num_rows($result) . '<br>';
+          $out_arr = array();
+          if (mysqli_num_rows($result) > 0) {
+            $uav_id = get_next_uav_id_and_incr($con);
+          } else {
+            break;
+          }
+        }
+
+        if ($uav_id > $drone_id_max) { //Allowed range exceeded
+          decr_uav_id($con);
+          // Close DB connection
+          mysqli_close($con);
+          // Set content type header to support data
+          $mimetype = 'text/plain';//"mime/type";
+          header("Content-Type: " . $mimetype );
+          // Set 'Internal Server Error' response code and output 0
+          http_response_code(500);
+          echo 0;
+          die(); // DIE
+        }
+
         $sql = "INSERT INTO `$uav_data_db` (`int_id`, `uav_id`, `uav_name`, `operator_name`, `operator_phone`, `operator_drone_cert`, `uav_weight_kg`, `uav_max_vel_mps`, `uav_max_endurance_s`, `uav_auth_key`, `reg_time`, `reg_ip`, `req_user_agent`) VALUES (NULL, '$uav_id', '$uav_name', '$operator_name', '$operator_phone', '$operator_drone_cert', '$uav_weight_kg', '$uav_max_vel_mps', '$uav_max_endurance_s', '$hash_string', '$time_epoch', '$ip_addr', '$user_agent');";
 
         $result = mysqli_query($con, $sql);          //query

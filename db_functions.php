@@ -34,7 +34,7 @@
   function get_next_uav_id_and_incr($connection){
     // Description: gets the next UAV ID / DroneID and increment the DB variable
     // Input: mysqli connection
-    // Output: next UAV ID or -1 if did not work
+    // Output: next UAV ID or die script if did not work
     global $var_data_db;
     $var_name = 'drone_id_next';
     $uav_id_next = get_data_from_db_single($var_name, $connection);
@@ -43,6 +43,27 @@
     $result = mysqli_query($connection, $sql);          //query
     if ($result !== false) {
       return intval($uav_id_next);
+    }
+    // Close DB connection
+    mysqli_close($connection);
+    // Set 'Internal Server Error' response code and output 0
+    http_response_code(500);
+    echo 0;
+    die(); // DIE - Authentication failed - not correct format
+  }
+
+  function decr_uav_id($connection){
+    // Description: decrements the UAV id in the DB
+    // Input: mysqli connection
+    // Output: 1 if success or die script if did not work
+    global $var_data_db;
+    $var_name = 'drone_id_next';
+    $uav_id_next = get_data_from_db_single($var_name, $connection);
+    $uav_id_prev = $uav_id_next - 1;
+    $sql = "UPDATE `$var_data_db` SET `data` = '$uav_id_prev' WHERE  `var` = '$var_name'";
+    $result = mysqli_query($connection, $sql);          //query
+    if ($result !== false) {
+      return 1;
     }
     // Close DB connection
     mysqli_close($connection);
