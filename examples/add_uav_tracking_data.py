@@ -40,29 +40,28 @@ if __name__ == '__main__':
         'wp_next_eta_epoch': 1537428516,
         'uav_bat_soc': 100
     }
-    while True:
-        print colored('Trying to POST the data...', 'yellow')
-        r = ''
-        try:
-            r = requests.post(url = 'https://droneid.dk/rmuasd/utm/tracking_data.php', data = payload, timeout=2)
-            r.raise_for_status()
-        except requests.exceptions.Timeout:
-    	    # Maybe set up for a retry, or continue in a retry loop
-    		print colored('Request has timed out', 'red')
-        except requests.exceptions.TooManyRedirects:
-            # Tell the user their URL was bad and try a different one
-            print colored('Request has too many redirects', 'red')
-        except requests.exceptions.HTTPError as err:
-            print colored('HTTP error', 'red')
-            print colored(err, 'yellow')
-            #sys.exit(1) # Consider the exit since it might be unintentional in some cases
-        except requests.exceptions.RequestException as err:
-            # Catastrophic error; bail.
-            print colored('Request error', 'red')
-            print colored(err, 'yellow')
-            sys.exit(1)
-        else:
-            if r.text == '1': # This check can in theory be omitted since the header check should catch an error
-                print colored('Success!\n', 'green')
-                print colored('Status code: %i' % r.status_code, 'yellow')
-                print colored('Content type: %s' % r.headers['content-type'], 'yellow')
+    print colored('Trying to POST the data...', 'yellow')
+    r = ''
+    try:
+        r = requests.post(url = 'https://droneid.dk/rmuasd/utm/tracking_data.php', data = payload, timeout=2)
+        r.raise_for_status()
+    except requests.exceptions.Timeout:
+	    # Maybe set up for a retry, or continue in a retry loop
+		print colored('Request has timed out', 'red')
+    except requests.exceptions.TooManyRedirects:
+        # Tell the user their URL was bad and try a different one
+        print colored('Request has too many redirects', 'red')
+    except requests.exceptions.HTTPError as err:
+        print colored('HTTP error', 'red')
+        print colored(err, 'yellow')
+        #sys.exit(1) # Consider the exit since it might be unintentional in some cases
+    except requests.exceptions.RequestException as err:
+        # Catastrophic error; bail.
+        print colored('Request error', 'red')
+        print colored(err, 'yellow')
+        sys.exit(1)
+    else:
+        if r.text == '1': # This check can in theory be omitted since the header check should catch an error
+            print colored('Success!\n', 'green')
+            print colored('Status code: %i' % r.status_code, 'yellow')
+            print colored('Content type: %s' % r.headers['content-type'], 'yellow')

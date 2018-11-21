@@ -302,8 +302,8 @@
         // Set content type header to support data
         $mimetype = 'text/plain';//"mime/type";
         header("Content-Type: " . $mimetype );
-        // Set 'Not Found' response code and output 0
-        http_response_code(404);
+        // Set 'No Content' response code and output 0
+        http_response_code(204);
         echo 0;
         die();
       }
