@@ -72,7 +72,7 @@ if __name__ == '__main__':
     }
     r = ''
     try:
-        r = requests.get(url = 'https://droneid.dk/rmuasd/utm/tracking_data_test.php', params = payload, timeout=2)
+        r = requests.get(url = 'https://droneid.dk/rmuasd/utm/tracking_data.php', params = payload, timeout=2)
         r.raise_for_status()
     except requests.exceptions.Timeout:
 	    # Maybe set up for a retry, or continue in a retry loop
