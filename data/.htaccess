@@ -9,6 +9,6 @@ Options -Indexes
   Deny from all
 </Files>
 
-<FilesMatch "\.(jpg|gif|png|php|html)$">
+<FilesMatch "\.(jpg|gif|png|php|html|css|js|kml)$">
   Allow from all
 </FilesMatch>
