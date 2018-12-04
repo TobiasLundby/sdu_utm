@@ -16,7 +16,7 @@
           && isset($_POST['wp_next_alt_m'])
           && isset($_POST['wp_next_hdg_deg'])
           && isset($_POST['wp_next_vel_mps'])
-          && !empty($_POST['wp_next_eta_epoch']) ) { //check if post using isset
+          && isset($_POST['wp_next_eta_epoch']) ) { //check if post using isset
         //  PASSED CHECKS
         // Require DB config
         require_once('config.php');
