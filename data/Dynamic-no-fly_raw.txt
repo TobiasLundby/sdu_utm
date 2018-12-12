@@ -74,3 +74,16 @@ Modelflyveplads - Circle 3
 
 Modelflyveplads - Circle 4
 10.41721,55.47204,40
+
+
+Aarslev flyveplads - Circle 1
+10.46455,55.31054,25
+
+Aarslev flyveplads - Circle 2
+10.46352,55.31093,20
+
+Aarslev flyveplads - Circle 3
+10.46262,55.31120,40
+
+Aarslev flyveplads - Field 1
+10.46269,55.31084 10.46311,55.31069 10.46377,55.31096
